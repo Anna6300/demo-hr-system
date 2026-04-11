@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.demo</groupId>
+    <artifactId>hr-system</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Demo HR System</name>
+    <description>
+        Demo HR System für die Bewerbung bei GIP.
+        Tech Stack: Quarkus, JakartaEE (CDI, JPA, JAX-RS), JUnit 5, REST Assured, Docker.
+    </description>
+
+    <properties>
+        <compiler-plugin.version>3.13.0</compiler-plugin.version>
+        <maven.compiler.release>21</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+        <quarkus.platform.version>3.15.1</quarkus.platform.version>
+        <surefire-plugin.version>3.2.5</surefire-plugin.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Quarkus Bill of Materials – verwaltet alle Quarkus-Versionen zentral -->
+            <dependency>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>${quarkus.platform.artifact-id}</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+
+        <!-- ===== JAX-RS REST API (JakartaEE) ===== -->
+        <!-- Ab Quarkus 3.9 umbenannt von quarkus-resteasy-reactive-jackson zu quarkus-rest-jackson -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-jackson</artifactId>
+        </dependency>
+
+        <!-- ===== CDI – Contexts and Dependency Injection (JakartaEE) ===== -->
+        <!-- Ermöglicht @ApplicationScoped, @Inject usw. -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-arc</artifactId>
+        </dependency>
+
+        <!-- ===== JPA / Hibernate mit Panache (vereinfachtes ORM) ===== -->
+        <!-- Panache ist ein Quarkus-Aufsatz auf Hibernate, der Boilerplate reduziert -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-orm-panache</artifactId>
+        </dependency>
+
+        <!-- ===== Bean Validation (JakartaEE) ===== -->
+        <!-- Ermöglicht @NotBlank, @Email, @Size usw. an Entitäten und DTOs -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-validator</artifactId>
+        </dependency>
+
+        <!-- ===== H2 In-Memory Datenbank (Entwicklung & Tests) ===== -->
+        <!-- In Produktion wird Oracle genutzt – die Konfiguration dafür ist
+             in application.properties auskommentiert enthalten -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-h2</artifactId>
+        </dependency>
+
+        <!-- ===== OpenAPI / Swagger UI ===== -->
+        <!-- Stellt automatisch eine interaktive API-Dokumentation bereit -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
+        </dependency>
+
+        <!-- ===== Testabhängigkeiten ===== -->
+
+        <!-- Quarkus JUnit 5-Integration – startet die App im Testmodus -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- REST Assured – typsicheres API-Testing wie ein HTTP-Client -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito via Quarkus-Integration für Unit-Tests mit CDI-Mocking -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5-mockito</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- AssertJ – lesbares Fluent-API für Assertions -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.25.3</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <!-- Quarkus Maven Plugin – baut das Quarkus-Artefakt -->
+            <plugin>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>generate-code</goal>
+                            <goal>generate-code-tests</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven Compiler Plugin – Java 17, mit -parameters für CDI -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compiler-plugin.version}</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire – führt Unit-Tests (*Test.java) aus -->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire-plugin.version}</version>
+                <configuration>
+                    <!-- argLine übergibt JVM-Flags an den von Surefire gestarteten Fork-Prozess.
+                         net.bytebuddy.experimental=true: Byte Buddy in Java 25 lauffähig machen.
+                         Surefire startet die Tests in einer separaten JVM, daher reicht
+                         .mvn/jvm.config (das nur den Maven-Prozess betrifft) hier nicht aus. -->
+                    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
+                    <systemPropertyVariables>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <maven.home>${maven.home}</maven.home>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

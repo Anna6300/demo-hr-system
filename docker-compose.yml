@@ -1,0 +1,69 @@
+version: "3.9"
+
+# =============================================================================
+# Docker Compose – Demo HR System
+# =============================================================================
+# Startet die Anwendung lokal.
+# Mit Oracle-Kommentaren als Vorlage für eine echte Produktionsumgebung.
+#
+# Befehle:
+#   docker compose up --build    → Baut Image und startet alle Services
+#   docker compose up -d         → Startet im Hintergrund
+#   docker compose logs -f app   → Log der Anwendung verfolgen
+#   docker compose down          → Stoppt und entfernt Container
+# =============================================================================
+
+services:
+
+  # ─── Quarkus HR-Anwendung ──────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hr-system-app
+    ports:
+      - "8080:8080"        # REST API + Swagger UI auf Port 8080
+    environment:
+      # H2 In-Memory (Standard – kein externer Datenbankserver nötig)
+      QUARKUS_DATASOURCE_DB_KIND: h2
+      QUARKUS_DATASOURCE_JDBC_URL: "jdbc:h2:mem:hrdb;DB_CLOSE_DELAY=-1"
+      QUARKUS_DATASOURCE_USERNAME: sa
+      QUARKUS_DATASOURCE_PASSWORD: ""
+
+      # Oracle (auskommentiert – für Produktion aktivieren):
+      # QUARKUS_DATASOURCE_DB_KIND: oracle
+      # QUARKUS_DATASOURCE_JDBC_URL: "jdbc:oracle:thin:@//oracle-db:1521/HRDB"
+      # QUARKUS_DATASOURCE_USERNAME: "${ORACLE_USER}"
+      # QUARKUS_DATASOURCE_PASSWORD: "${ORACLE_PASSWORD}"
+
+      QUARKUS_LOG_LEVEL: INFO
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/employees"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+
+  # ─── Oracle DB (auskommentiert – optional für echte Oracle-Tests) ──────────
+  # Benötigt einen Oracle-Account für das Image (oracle/database:19.3.0-ee).
+  # Alternativ: Oracle XE (Express Edition) über container-registry.oracle.com
+  #
+  # oracle-db:
+  #   image: container-registry.oracle.com/database/express:21.3.0-xe
+  #   container_name: hr-oracle
+  #   ports:
+  #     - "1521:1521"
+  #   environment:
+  #     ORACLE_PWD: oracle_password
+  #   volumes:
+  #     - oracle-data:/opt/oracle/oradata
+  #   healthcheck:
+  #     test: ["CMD", "sqlplus", "-L", "sys/oracle_password@localhost/XE", "AS", "SYSDBA"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 10
+  #     start_period: 60s
+
+# volumes:
+#   oracle-data:
