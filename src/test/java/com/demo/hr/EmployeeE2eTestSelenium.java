@@ -25,7 +25,7 @@ class EmployeeE2eTestSelenium {
     static void launchBrowser() {
         ChromeOptions options = new ChromeOptions();
         // Убрать "--headless" чтобы видеть браузер во время теста
-        // options.addArguments("--headless=new");
+        //options.addArguments("--headless=new");
         driver = new ChromeDriver(options);
     }
 

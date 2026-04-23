@@ -28,7 +28,6 @@ public class EmployeeFormPage {
     private WebElement firstNameInput()   { return driver.findElement(By.cssSelector("input[name='firstName']")); }
     private WebElement lastNameInput()    { return driver.findElement(By.cssSelector("input[name='lastName']")); }
     private WebElement emailInput()       { return driver.findElement(By.cssSelector("input[name='email']")); }
-    private WebElement departmentSelect() { return driver.findElement(By.cssSelector("select[name='department']")); }
     private WebElement positionInput()    { return driver.findElement(By.cssSelector("input[name='position']")); }
     private WebElement salaryInput()      { return driver.findElement(By.cssSelector("input[name='salary']")); }
     private WebElement hireDateInput()    { return driver.findElement(By.cssSelector("input[name='hireDate']")); }

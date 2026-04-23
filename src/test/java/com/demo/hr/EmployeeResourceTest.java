@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
  *
  * Strategie: Diese Tests starten die gesamte Quarkus-Anwendung mit einer
  * echten H2-Datenbank (kein Mocking). REST Assured sendet echte HTTP-Requests
- * gegen die laufende Anwendung.
+ * gegen die laufende Anwendung."
  *
  * Unterschied zu EmployeeServiceTest:
  *   Unit-Test   → mockt Abhängigkeiten, testet nur eine Klasse in Isolation
