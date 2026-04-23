@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR System</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    header {
+      background: #1e40af;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.02em; }
+
+    main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      align-items: center;
+    }
+    .toolbar input, .toolbar select {
+      padding: 0.45rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      background: white;
+    }
+    .toolbar input { width: 220px; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 0.45rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-primary   { background: #1e40af; color: white; }
+    .btn-warning   { background: #d97706; color: white; }
+    .btn-danger    { background: #dc2626; color: white; }
+    .btn-secondary { background: #6b7280; color: white; }
+    .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.8rem; }
+
+    /* ── Table ── */
+    .card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: #f9fafb;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #6b7280;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 0.875rem;
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-active   { background: #d1fae5; color: #065f46; }
+    .badge-inactive { background: #fee2e2; color: #991b1b; }
+    .badge-dept     { background: #e0e7ff; color: #3730a3; }
+
+    .actions { display: flex; gap: 0.4rem; }
+
+    /* ── Modal ── */
+    .overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      width: min(520px, 95vw);
+      box-shadow: 0 8px 32px rgba(0,0,0,.2);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 1.1rem 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header button {
+      background: none; border: none; font-size: 1.3rem;
+      cursor: pointer; color: #6b7280; line-height: 1;
+    }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    /* ── Form ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 0.8rem; font-weight: 600; color: #374151; }
+    input, select {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      width: 100%;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #1e40af;
+      box-shadow: 0 0 0 2px rgba(30,64,175,.15);
+    }
+    .field-error { color: #dc2626; font-size: 0.75rem; margin-top: 0.2rem; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 1.5rem; right: 1.5rem;
+      background: #1f2937;
+      color: white;
+      padding: 0.7rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      display: none;
+      opacity: 0;
+      transition: opacity .3s;
+      z-index: 200;
+      max-width: 320px;
+    }
+    #toast.show { display: block; opacity: 1; }
+    #toast.error { background: #dc2626; }
+
+    .empty { text-align: center; padding: 3rem; color: #9ca3af; font-size: 0.95rem; }
+    .loading { text-align: center; padding: 2rem; color: #9ca3af; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>HR System</h1>
+</header>
+
+<main>
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Search by name…" />
+    <select id="filterDept">
+      <option value="">All departments</option>
+      <option>IT</option>
+      <option>HR</option>
+      <option>FINANCE</option>
+      <option>LEGAL</option>
+      <option>OPERATIONS</option>
+      <option>MANAGEMENT</option>
+    </select>
+    <select id="filterStatus">
+      <option value="">All employees</option>
+      <option value="active">Active only</option>
+    </select>
+    <button class="btn btn-primary" onclick="openCreate()">+ New Employee</button>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Department</th>
+          <th>Position</th>
+          <th>Salary</th>
+          <th>Hire Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="8" class="loading">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modalTitle">New Employee</span>
+      <button onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="employeeForm" onsubmit="submitForm(event)" novalidate>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input name="firstName" required />
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input name="lastName" required />
+          </div>
+          <div class="form-group full">
+            <label>Email *</label>
+            <input name="email" type="email" required />
+          </div>
+          <div class="form-group">
+            <label>Department *</label>
+            <select name="department" required>
+              <option value="">Select…</option>
+              <option>IT</option>
+              <option>HR</option>
+              <option>FINANCE</option>
+              <option>LEGAL</option>
+              <option>OPERATIONS</option>
+              <option>MANAGEMENT</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Position *</label>
+            <input name="position" required />
+          </div>
+          <div class="form-group">
+            <label>Salary *</label>
+            <input name="salary" type="number" min="0.01" step="0.01" required />
+          </div>
+          <div class="form-group">
+            <label>Hire Date</label>
+            <input name="hireDate" type="date" />
+          </div>
+        </div>
+        <div id="formError" class="field-error" style="margin-top:.75rem"></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('employeeForm').requestSubmit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const API = '/api/employees';
+  let allEmployees = [];
+  let editingId = null;
+
+  // ── Fetch & Render ─────────────────────────────────────────────────────────
+
+  async function loadEmployees() {
+    try {
+      const res = await fetch(API);
+      allEmployees = await res.json();
+      renderTable();
+    } catch {
+      showToast('Failed to load employees', true);
+    }
+  }
+
+  function renderTable() {
+    const search = document.getElementById('search').value.toLowerCase();
+    const dept   = document.getElementById('filterDept').value;
+    const status = document.getElementById('filterStatus').value;
+
+    let rows = allEmployees.filter(e => {
+      const nameMatch = (e.firstName + ' ' + e.lastName).toLowerCase().includes(search);
+      const deptMatch = !dept || e.department === dept;
+      const statusMatch = !status || (status === 'active' && e.active);
+      return nameMatch && deptMatch && statusMatch;
+    });
+
+    const tbody = document.getElementById('tableBody');
+
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty">No employees found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(e => `
+      <tr>
+        <td>${esc(e.firstName)} ${esc(e.lastName)}</td>
+        <td>${esc(e.email)}</td>
+        <td><span class="badge badge-dept">${esc(e.department)}</span></td>
+        <td>${esc(e.position)}</td>
+        <td>${formatSalary(e.salary)}</td>
+        <td>${e.hireDate ?? '—'}</td>
+        <td><span class="badge ${e.active ? 'badge-active' : 'badge-inactive'}">${e.active ? 'Active' : 'Inactive'}</span></td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-warning btn-sm" onclick="openEdit(${e.id})">Edit</button>
+            ${e.active
+              ? `<button class="btn btn-secondary btn-sm" onclick="deactivate(${e.id})">Deactivate</button>`
+              : `<button class="btn btn-danger btn-sm" onclick="hardDelete(${e.id})">Delete</button>`
+            }
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // ── Filters ────────────────────────────────────────────────────────────────
+
+  document.getElementById('search').addEventListener('input', renderTable);
+  document.getElementById('filterDept').addEventListener('change', renderTable);
+  document.getElementById('filterStatus').addEventListener('change', renderTable);
+
+  // ── Modal ──────────────────────────────────────────────────────────────────
+
+  function openCreate() {
+    editingId = null;
+    document.getElementById('modalTitle').textContent = 'New Employee';
+    document.getElementById('employeeForm').reset();
+    document.getElementById('formError').textContent = '';
+    document.getElementById('overlay').classList.add('open');
+  }
+
+  function openEdit(id) {
+    const emp = allEmployees.find(e => e.id === id);
+    if (!emp) return;
+    editingId = id;
+    document.getElementById('modalTitle').textContent = 'Edit Employee';
+    document.getElementById('formError').textContent = '';
+
+    const form = document.getElementById('employeeForm');
+    form.firstName.value  = emp.firstName  ?? '';
+    form.lastName.value   = emp.lastName   ?? '';
+    form.email.value      = emp.email      ?? '';
+    form.department.value = emp.department ?? '';
+    form.position.value   = emp.position   ?? '';
+    form.salary.value     = emp.salary     ?? '';
+    form.hireDate.value   = emp.hireDate   ?? '';
+
+    document.getElementById('overlay').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('open');
+  }
+
+  document.getElementById('overlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
+
+  async function submitForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    document.getElementById('formError').textContent = '';
+
+    const payload = {
+      firstName:  form.firstName.value.trim(),
+      lastName:   form.lastName.value.trim(),
+      email:      form.email.value.trim(),
+      department: form.department.value,
+      position:   form.position.value.trim(),
+      salary:     parseFloat(form.salary.value),
+    };
+    if (form.hireDate.value) payload.hireDate = form.hireDate.value;
+
+    try {
+      const url    = editingId ? `${API}/${editingId}` : API;
+      const method = editingId ? 'PUT' : 'POST';
+      const res    = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        closeModal();
+        showToast(editingId ? 'Employee updated.' : 'Employee created.');
+        await loadEmployees();
+      } else {
+        const body = await res.json().catch(() => ({}));
+        const msg  = body.details ?? body.title ?? `Error ${res.status}`;
+        document.getElementById('formError').textContent = msg;
+      }
+    } catch {
+      document.getElementById('formError').textContent = 'Network error.';
+    }
+  }
+
+  // ── Deactivate / Delete ────────────────────────────────────────────────────
+
+  async function deactivate(id) {
+    if (!confirm('Deactivate this employee?')) return;
+    const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      showToast('Employee deactivated.');
+      await loadEmployees();
+    } else {
+      showToast('Failed to deactivate.', true);
+    }
+  }
+
+  async function hardDelete(id) {
+    if (!confirm('Permanently delete this employee? This cannot be undone.')) return;
+    const res = await fetch(`${API}/${id}/hard`, { method: 'DELETE' });
+    if (res.ok) {
+      showToast('Employee deleted.');
+      await loadEmployees();
+    } else {
+      showToast('Failed to delete.', true);
+    }
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  function esc(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function formatSalary(n) {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR' }).format(n);
+  }
+
+  let toastTimer;
+  function showToast(msg, isError = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.style.display = '';  // let CSS class take over
+    el.className = 'show' + (isError ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      el.className = '';
+      // Set display:none after the 300ms CSS fade-out so Playwright sees it as hidden
+      setTimeout(() => { el.style.display = 'none'; }, 300);
+    }, 3000);
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  loadEmployees();
+</script>
+</body>
+</html>

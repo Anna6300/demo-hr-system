@@ -57,7 +57,7 @@ public class EmployeeResource {
 
     @GET
     @Operation(summary = "Alle Mitarbeiter abrufen",
-               description = "Gibt alle Mitarbeiter zurück. Optional mit Namenssuche per ?search=...")
+               description = "Gibt alle Mitarbeiter zurück. Optional mit Namenssuche per first name")
     public List<Employee> getAll(@QueryParam("search") String search) {
         return employeeService.searchEmployees(search);
     }

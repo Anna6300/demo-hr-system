@@ -70,6 +70,7 @@ public class EmployeeService {
      */
     @Transactional
     public Employee createEmployee(Employee employee) {
+        employee.id = null;
         validateEmailUnique(employee.email, null);
         employee.hireDate = employee.hireDate != null ? employee.hireDate : LocalDate.now();
         employeeRepository.persist(employee);

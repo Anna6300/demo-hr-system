@@ -114,6 +114,22 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Playwright – Browser-basierte E2E-Tests -->
+        <dependency>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>1.49.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Selenium – Browser-basierte E2E-Tests (альтернатива Playwright) -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>4.27.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -145,6 +161,25 @@
                         <arg>-parameters</arg>
                     </compilerArgs>
                 </configuration>
+            </plugin>
+
+            <!-- Installiert Playwright-Browser einmalig vor den Tests -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>playwright-install</id>
+                        <phase>test-compile</phase>
+                        <goals><goal>java</goal></goals>
+                        <configuration>
+                            <mainClass>com.microsoft.playwright.CLI</mainClass>
+                            <classpathScope>test</classpathScope>
+                            <args><arg>install</arg><arg>chromium</arg></args>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Surefire – führt Unit-Tests (*Test.java) aus -->
