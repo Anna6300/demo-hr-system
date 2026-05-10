@@ -1,6 +1,6 @@
 # Demo HR System
 
-Ein Demo-Projekt zur Bewerbung für die Position **Java Entwickler | Schwerpunkt Testautomatisierung** bei der GIP GmbH.
+Ein Demo-Projekt zur Bewerbung 
 
 Das System implementiert eine REST-API zur Mitarbeiterverwaltung und demonstriert den geforderten Tech Stack: **Quarkus**, **JakartaEE**, **JPA/Hibernate**, **JUnit 5**, **REST Assured** und **Docker**.
 
